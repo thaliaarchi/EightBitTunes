@@ -13,35 +13,35 @@ long defaultNoteDuration;
 // Note range: C,D,E,F,G,A,B,CDEFGABcdefgabc'd'e'f'g'a'b' (first index)
 // ** If the note is 'sharp', then look as the second index
 int frequencies[][2] = {
-    {131, 139}, //C,
-    {147, 156}, //D,
-    {165, 165}, //E, (no sharp)
-    {175, 185}, //F,
-    {196, 208}, //G,
-    {220, 233}, //A,
-    {247, 247}, //B, (no sharp)
-    {262, 277}, //C
-    {294, 311}, //D
-    {330, 330}, //E (no sharp)
-    {349, 370}, //F
-    {392, 415}, //G
-    {440, 466}, //A
-    {494, 494}, //B (no sharp)
-    {523, 554}, //c
-    {587, 622}, //d
-    {659, 659}, //e (no sharp)
-    {698, 740}, //f
-    {784, 831}, //g
-    {880, 932}, //a
-    {988, 988}, //b (no sharp)
-    {1047, 1109}, //c,
-    {1175, 1245}, //d,
-    {1319, 1319}, //e, (no sharp)
-    {1397, 1480}, //f,
-    {1568, 1661}, //g,
-    {1760, 1865}, //a,
-    {1976, 1976}, //b, (no sharp)
-    {0, 0}        //rest
+  {131, 139}, //C,
+  {147, 156}, //D,
+  {165, 165}, //E, (no sharp)
+  {175, 185}, //F,
+  {196, 208}, //G,
+  {220, 233}, //A,
+  {247, 247}, //B, (no sharp)
+  {262, 277}, //C
+  {294, 311}, //D
+  {330, 330}, //E (no sharp)
+  {349, 370}, //F
+  {392, 415}, //G
+  {440, 466}, //A
+  {494, 494}, //B (no sharp)
+  {523, 554}, //c
+  {587, 622}, //d
+  {659, 659}, //e (no sharp)
+  {698, 740}, //f
+  {784, 831}, //g
+  {880, 932}, //a
+  {988, 988}, //b (no sharp)
+  {1047, 1109}, //c,
+  {1175, 1245}, //d,
+  {1319, 1319}, //e, (no sharp)
+  {1397, 1480}, //f,
+  {1568, 1661}, //g,
+  {1760, 1865}, //a,
+  {1976, 1976}, //b, (no sharp)
+  {0, 0}        //rest
 };
 
 ABCNoteParser::ABCNoteParser() {
@@ -121,10 +121,10 @@ void ABCNoteParser::getNextNote(Stream* str, int* freq, int* dur) {
         inputChar = str->read();
         skipCharacters(str, &inputChar, ": ");
         // Get the value for the meter from the fractional form (ex: 4/4 or 6/8)
-        meterValue = (float)getIntegerFromStream(str, &inputChar);
+        meterValue = (float) getIntegerFromStream(str, &inputChar);
         if (inputChar == '/') {
           inputChar = str->read(); // move past the '/'
-          meterValue /= (float)getIntegerFromStream(str, &inputChar);
+          meterValue /= (float) getIntegerFromStream(str, &inputChar);
         }
         // Calculate the default note length based on the Meter
         defaultNoteLength = meterValue < 0.75f ? 0.0625f : 0.125f;
@@ -144,7 +144,7 @@ void ABCNoteParser::getNextNote(Stream* str, int* freq, int* dur) {
         // based on this assumption
         if (inputChar == '/') {
           inputChar = str->read();
-          double tempoNoteLength = (double)defaultNoteDuration / (double)getIntegerFromStream(str, &inputChar);
+          double tempoNoteLength = (double) defaultNoteDuration / (double) getIntegerFromStream(str, &inputChar);
           // bypass the filler characters
           while (inputChar != '=') inputChar = str->read();
           inputChar = str->read();
@@ -168,10 +168,10 @@ void ABCNoteParser::getNextNote(Stream* str, int* freq, int* dur) {
         inputChar = str->read();
         skipCharacters(str, &inputChar, ": ");
         // Get the value for the length from the fractional form (ex: 4/4)
-        defaultNoteLength = (float)getIntegerFromStream(str, &inputChar);
+        defaultNoteLength = (float) getIntegerFromStream(str, &inputChar);
         if (inputChar == '/') {
           inputChar = str->read();
-          defaultNoteLength /= (float)getIntegerFromStream(str, &inputChar);
+          defaultNoteLength /= (float) getIntegerFromStream(str, &inputChar);
         }
         // Calculate the default note duration based off of our (potentially new) note length
         defaultNoteDuration = delayTimeInMilliseconds(defaultNoteLength, beatsPerMinute);
@@ -254,7 +254,7 @@ int ABCNoteParser::getDuration(Stream* stream, char* input) {
   while (*input == '>') {
     // A > (aka a hornpipe) represents a 'dotted' note
     // (therefore adds half its current duration to itself)
-    duration += duration/2;
+    duration *= 1.5;
     *input = stream->read();
   }
   
@@ -316,7 +316,7 @@ int ABCNoteParser::getFrequency(Stream* stream, char* input) {
   if (flatIndicator) {
     // Flats can also become the below notes sharp freq
     sharpIndicator = true;
-    noteFreqIndex = max(noteFreqIndex-1,0);
+    noteFreqIndex = max(noteFreqIndex - 1, 0);
   }
   return frequencies[noteFreqIndex][sharpIndicator ? 1 : 0];
 }

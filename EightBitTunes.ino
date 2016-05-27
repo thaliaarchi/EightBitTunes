@@ -21,6 +21,3 @@ void manageTunes() {
     songManager->playTunes();
   }
 }
-
-
-

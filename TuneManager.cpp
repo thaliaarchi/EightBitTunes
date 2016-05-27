@@ -40,9 +40,9 @@ TuneManager::TuneManager(char tuneFolderPath[]) {
 }
 
 void TuneManager::addNotesToTune(Stream* str, int numOfNotesToAdd) {
-  for (int i=0; i<numOfNotesToAdd; i++) {
+  for (int i = 0; i < numOfNotesToAdd; i++) {
     // Immediately abort loading more notes if we have run out of space in the buffer
-    if ((writeNoteIndex+1)%MAX_NOTE_BUFFER == readNoteIndex) return;
+    if ((writeNoteIndex + 1) % MAX_NOTE_BUFFER == readNoteIndex) return;
     
     // If the file is still available, get the next freq and duration
     if (str->available()) {
@@ -60,7 +60,7 @@ void TuneManager::addNotesToTune(Stream* str, int numOfNotesToAdd) {
         tuneDur[writeNoteIndex] = nextNoteDur;
         
         // Increment the index of where we are writing our notes
-        writeNoteIndex = (writeNoteIndex+1)%MAX_NOTE_BUFFER;
+        writeNoteIndex = (writeNoteIndex + 1) % MAX_NOTE_BUFFER;
         
         // So long as we were able to get the next note, continue with the parsing process
         continue;
@@ -108,7 +108,7 @@ void TuneManager::playTunes() {
     // Before playing, if this and the next notes are the same frequency, we need to manually
     // add a small break between the notes so they don't blend together
     int tempDur = tuneDur[readNoteIndex];
-    if (tuneFreq[(readNoteIndex+1)%MAX_NOTE_BUFFER] == tuneFreq[readNoteIndex]) {
+    if (tuneFreq[(readNoteIndex + 1) % MAX_NOTE_BUFFER] == tuneFreq[readNoteIndex]) {
       // Remove some milliseconds to the notes interval to create a short 'rest'
       tempDur -= 10;
     }
@@ -120,7 +120,7 @@ void TuneManager::playTunes() {
     interval = tuneDur[readNoteIndex];
      
     // Remove the note we just played so it doesn't repeat
-    readNoteIndex = (readNoteIndex+1)%MAX_NOTE_BUFFER;
+    readNoteIndex = (readNoteIndex + 1) % MAX_NOTE_BUFFER;
   } else {
     // If we can't play a note yet, might as well buffer some of the upcoming notes
     //Serial.println("Not playing a note, so add to buffer");

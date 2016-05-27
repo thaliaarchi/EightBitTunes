@@ -18,6 +18,3 @@ class ABCNoteParser {
 };
 
 #endif
-
-
-
