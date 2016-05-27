@@ -114,7 +114,7 @@ void TuneManager::playTunes() {
     }
   
     // Play the note  
-    tone(PIN_PEZO, tuneFreq[readNoteIndex], tempDur);
+    tone(PIN_PIEZO, tuneFreq[readNoteIndex], tempDur);
     
     // Set how long to wait until next note 
     interval = tuneDur[readNoteIndex];
