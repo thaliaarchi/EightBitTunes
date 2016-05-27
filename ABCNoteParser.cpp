@@ -73,7 +73,7 @@ void ABCNoteParser::getNextNote(Stream* stream, int* freq, int* dur) {
       inputChar = stream->read();
       skipCharactersUntil(stream, &inputChar, "+");
     }
-    
+
     // If we are in a 'header section'
     switch (inputChar) {
       // Ignore all unsupported header lines
@@ -95,8 +95,8 @@ void ABCNoteParser::getNextNote(Stream* stream, int* freq, int* dur) {
       case '%':
         skipCharactersUntil(stream, &inputChar, "\n");
         break;
-        
-      case 'K':  // Key, also marks the end of the header
+
+      case 'K': // Key; also marks the end of the header
         Serial.println(F("Handling header: K - Key"));
         // Currently only supports default Key C major
         // Marks the end of the official header, so scroll forward til endline
@@ -112,10 +112,10 @@ void ABCNoteParser::getNextNote(Stream* stream, int* freq, int* dur) {
         Serial.print(F("Note Duration: "));
         Serial.println(defaultNoteDuration);
         Serial.println(F("Finished handling header: K - Key"));
-        
+
         break;
-      
-      case 'M':  // Meter
+
+      case 'M': // Meter
         Serial.println(F("Handling header: M - Meter"));
         // Remove the expected ':' character
         inputChar = stream->read();
@@ -131,8 +131,8 @@ void ABCNoteParser::getNextNote(Stream* stream, int* freq, int* dur) {
         // Calculate the default note duration based off of our (potentially new) note length
         defaultNoteDuration = delayTimeInMilliseconds(defaultNoteLength, beatsPerMinute);
         break;
-      
-      case 'Q':  // Tempo
+
+      case 'Q': // Tempo
         Serial.println(F("Handling header: Q - Tempo"));
         // Remove the expected ':' character
         inputChar = stream->read();
@@ -161,8 +161,8 @@ void ABCNoteParser::getNextNote(Stream* stream, int* freq, int* dur) {
         }
         Serial.println(F("Finished handling header: Q - Tempo"));
         break;
-      
-      case 'L':  // Default Note Length
+
+      case 'L': // Default Note Length
         Serial.println(F("Handling header: L - Note Length"));
         // Remove the expected ':' character
         inputChar = stream->read();
@@ -176,24 +176,24 @@ void ABCNoteParser::getNextNote(Stream* stream, int* freq, int* dur) {
         // Calculate the default note duration based off of our (potentially new) note length
         defaultNoteDuration = delayTimeInMilliseconds(defaultNoteLength, beatsPerMinute);
         break;
-        
+
       case '[':
         inBrackets = true;
         inputChar = stream->read();
         break;
-        
+
       case '|':
         // Some combinations of brackets [] actually have aesthetic meanings in ABC Notation
         // Once such combo is [| which we don't want to be seen as chord brackets []
         inBrackets = false;
         inputChar = stream->read();
         break;
-        
+
       case ']':
         inBrackets = false;
         inputChar = stream->read();
         break;
-      
+
       default:
         // If not a header, treat it as a note
         *freq = getFrequency(stream, &inputChar);
@@ -220,7 +220,7 @@ void ABCNoteParser::getNextNote(Stream* stream, int* freq, int* dur) {
 int ABCNoteParser::getIntegerFromStream(Stream* stream, char* previewedChar) {
   int num = 0;
   while ('0' <= *previewedChar && *previewedChar <= '9') {
-    num = (num*10) + atoi(previewedChar);
+    num = (num * 10) + atoi(previewedChar);
     *previewedChar = stream->read();
   }
   return num;
@@ -233,15 +233,15 @@ double ABCNoteParser::delayTimeInMilliseconds(double noteLength, float bpm) {
 int ABCNoteParser::getDuration(Stream* stream, char* input) {
   // Start off with the default duration
   int duration = defaultNoteDuration;
-  
+
   // First see if we can find a multiplier (no preceding chars, just digits)
   int modifier = getIntegerFromStream(stream, input);
-  
+
   if (modifier > 0) {
     // If there was a digit, then it means we multiply our current duration by that number
     duration *= modifier;
   }
-  
+
   while (*input == '/') {
     // If a / is found, it means we divide our duration by the next number
     // If no number is provided, the default is /2
@@ -250,19 +250,19 @@ int ABCNoteParser::getDuration(Stream* stream, char* input) {
     else duration /= 2;
     *input = stream->read();
   }
-  
+
   while (*input == '>') {
     // A > (aka a hornpipe) represents a 'dotted' note
     // (therefore adds half its current duration to itself)
     duration *= 1.5;
     *input = stream->read();
   }
-  
+
   return duration;
 }
 
 int ABCNoteParser::getFrequency(Stream* stream, char* input) {
-  // setup some note-specific defaults first
+  // Setup some note-specific defaults first
   boolean sharpIndicator = false;
   boolean flatIndicator = false;
   int noteFreqIndex = -1;

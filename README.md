@@ -10,7 +10,7 @@ This library does not fully support ABC Notation, it only supports what is neede
 
 To be more specific, this library currently supports:<br>
 - Four continuous octaves (starting at the octave below Middle C)<br>
-- Flats, Sharps, Normalized Notes (no doubles) (examples: ^A is A sharp, _A is A flat, =A is normal A)<br>
+- Flats, sharps, normalized notes (no doubles) (examples: ^A is A sharp, _A is A flat, =A is normal A)<br>
 - Modifying note durations (examples: A2 is the A note for twice the default duration, A/2 and A/ are half default duration, A3/4 is 75% of default duration)<br>
 - The following header fields (both in the header and in mid-tune when surrounded by [] tags) : <br>
         - M - Meter (default: 4/4)<br>
