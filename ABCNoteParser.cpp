@@ -8,40 +8,36 @@ float defaultNoteLength;
 long beatsPerMinute;
 long defaultNoteDuration;
 
-// Extra information about ABC Notation:
-// Middle C is represented as C 
-// Note range: C,D,E,F,G,A,B,CDEFGABcdefgabc'd'e'f'g'a'b' (first index)
-// ** If the note is 'sharp', then look as the second index
-int frequencies[][2] = {
-  {131, 139}, //C,
-  {147, 156}, //D,
-  {165, 165}, //E, (no sharp)
-  {175, 185}, //F,
-  {196, 208}, //G,
-  {220, 233}, //A,
-  {247, 247}, //B, (no sharp)
-  {262, 277}, //C
-  {294, 311}, //D
-  {330, 330}, //E (no sharp)
-  {349, 370}, //F
-  {392, 415}, //G
-  {440, 466}, //A
-  {494, 494}, //B (no sharp)
-  {523, 554}, //c
-  {587, 622}, //d
-  {659, 659}, //e (no sharp)
-  {698, 740}, //f
-  {784, 831}, //g
-  {880, 932}, //a
-  {988, 988}, //b (no sharp)
-  {1047, 1109}, //c,
-  {1175, 1245}, //d,
-  {1319, 1319}, //e, (no sharp)
-  {1397, 1480}, //f,
-  {1568, 1661}, //g,
-  {1760, 1865}, //a,
-  {1976, 1976}, //b, (no sharp)
-  {0, 0}        //rest
+// Frequencies from Wikipedia:
+// https://en.wikipedia.org/wiki/Scientific_pitch_notation
+// https://en.wikipedia.org/wiki/Piano_key_frequencies
+// Middle C is represented as C
+// C' is equivalent to c
+int frequencies[] = {
+  // C     C#/Db    D        D#/Eb    E        F
+  // F#/Gb G        G#/Ab    A        A#/Bb    B
+  16.352,  17.324,  18.354,  19.445,  20.602,  21.827,  // Octave 0 (0-11) C,,,,
+  23.125,  24.5,    25.957,  27.5,    29.1352, 30.8677,
+  32.7032, 34.6478, 36.7081, 38.8909, 41.2034, 43.6535, // Octave 1 (12-23) C,,,
+  46.2493, 48.9994, 51.9131, 55,      58.2705, 61.7354,
+  65.4064, 69.2957, 73.4162, 77.7817, 82.4069, 87.3071, // Octave 2 (24-35) C,,
+  92.4986, 97.9989, 103.826, 110,     116.541, 123.471,
+  130.813, 138.591, 146.832, 155.563, 164.814, 174.614, // Octave 3 (36-47) C,
+  184.997, 195.998, 207.652, 220,     233.082, 246.942,
+  261.626, 277.183, 293.665, 311.127, 329.628, 349.228, // Octave 4 (48-59) C
+  369.994, 391.995, 415.305, 440,     466.164, 493.883,
+  523.251, 554.365, 587.33,  622.254, 659.255, 698.456, // Octave 5 (60-71) c
+  739.989, 783.991, 830.609, 880,     932.328, 987.767,
+  1046.5,  1108.73, 1174.66, 1244.51, 1318.51, 1396.91, // Octave 6 (72-83) c'
+  1479.98, 1567.98, 1661.22, 1760,    1864.66, 1975.53,
+  2093,    2217.46, 2349.32, 2489.02, 2637.02, 2793.83, // Octave 7 (84-95) c''
+  2959.96, 3135.96, 3322.44, 3520,    3729.31, 3951.07,
+  4186.01, 4434.9,  4698.6,  4978,    5274,    5587.7,  // Octave 8 (96-107) c'''
+  5919.9,  6271.9,  6644.9,  7040,    7458.6,  7902.1,
+  8372,    8869.8,  9397.3,  9956.1,  10548.1, 11175.3, // Octave 9 (108-119) c''''
+  11839.8, 12543.9, 13289.8, 14080,   14917.2, 15804.3,
+  16744,   17739.7, 18794.5, 19912.1, 21096.2, 22350.6, // Octave 10 (120-131) c'''''
+  23679.6, 25087.7, 26579.5, 28160,   29834.5, 31608.5
 };
 
 ABCNoteParser::ABCNoteParser() {
@@ -263,62 +259,53 @@ int ABCNoteParser::getDuration(Stream* stream, char* input) {
 
 int ABCNoteParser::getFrequency(Stream* stream, char* input) {
   // Setup some note-specific defaults first
-  boolean sharpIndicator = false;
-  boolean flatIndicator = false;
-  int noteFreqIndex = -1;
+  int accidentals = 0;
+  int octave = 4;
+  int noteStep = -1;
   
-  // Get the sharp/flat modifier (will recognize but pass over doubles)
+  // Get the accidental modifier(s)
   while (*input == '^') {
-    sharpIndicator = true;
+    accidentals++;
     *input = stream->read();
   }
   while (*input == '_') {
-    flatIndicator = true;
+    accidentals--;
     *input = stream->read();
   }
-  
-  // Get the note (CDEFGAB)
-  if (*input == 'z') {
-    // if z, map to 28 (rest)
-    noteFreqIndex = 28;
-  } else if ('C' <= *input && *input <= 'G') {
-    // If CDEFG, map to 7-11
-    noteFreqIndex = *input - 'C' + 7;
-  } else if ('A' <= *input && *input <= 'B') {
-    // If AB, map to 12-13
-    noteFreqIndex = *input - 'A' + 12;
-  } else if ('c' <= *input && *input <= 'g') {
-    // If cdefg, map to 14-18
-    noteFreqIndex = *input - 'c' + 14;
-  } else if ('a' <= *input && *input <= 'b') {
-    // If ab, map to 19-20
-    noteFreqIndex = *input - 'a' + 19;
-  }
-    
-  // If, for whatever reason, we still don't have a note, exit with a failure
-  if (noteFreqIndex == -1) return -1;
-  
+
+  // If z (rest), return frequency of 0
+  if (*input == 'z') return 0;
+
+  // If lowercase, set up an octave
+  char noteName = toupper(*input); // NOTE: not sure if this is the correct pointer use
+  if (noteName != *input) octave++;
   *input = stream->read();
-  
+
+  switch (noteName) {
+    case 'C': noteStep = 0; break;
+    case 'D': noteStep = 2; break;
+    case 'E': noteStep = 4; break;
+    case 'F': noteStep = 5; break;
+    case 'G': noteStep = 7; break;
+    case 'A': noteStep = 9; break;
+    case 'B': noteStep = 11; break;
+    default: return -1;  // If, for whatever reason, we still don't have a note, exit with a failure
+  }
+
   // Get the octave modifier (optional)
   if (*input == '\'') {
     // Apostrophe ' puts the note up an octave
-    noteFreqIndex += 7;
+    octave++;
     *input = stream->read();
   }    
   if (*input == ',') {
     // Comma , puts the note down an octave
-    noteFreqIndex -= 7;
+    octave--;
     *input = stream->read();
   }
-  
+
   // Take our note frequency info and get the actual frequency
-  if (flatIndicator) {
-    // Flats can also become the below notes sharp freq
-    sharpIndicator = true;
-    noteFreqIndex = max(noteFreqIndex - 1, 0);
-  }
-  return frequencies[noteFreqIndex][sharpIndicator ? 1 : 0];
+  return frequencies[12 * octave + noteStep + accidentals];
 }
 
 void ABCNoteParser::skipCharacters(Stream* stream, char* input, char* skipChars) {
