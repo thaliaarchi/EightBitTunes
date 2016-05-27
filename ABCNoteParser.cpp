@@ -13,7 +13,7 @@ long defaultNoteDuration;
 // https://en.wikipedia.org/wiki/Piano_key_frequencies
 // Middle C is represented as C
 // C' is equivalent to c
-int frequencies[] = {
+const int frequencies[] = {
   // C     C#/Db    D        D#/Eb    E        F
   // F#/Gb G        G#/Ab    A        A#/Bb    B
   16.352,  17.324,  18.354,  19.445,  20.602,  21.827,  // Octave 0 (0-11) C,,,,
@@ -264,12 +264,9 @@ int ABCNoteParser::getFrequency(Stream* stream, char* input) {
   int noteStep = -1;
   
   // Get the accidental modifier(s)
-  while (*input == '^') {
-    accidentals++;
-    *input = stream->read();
-  }
-  while (*input == '_') {
-    accidentals--;
+  while (strchr("^_", *input)) {
+    if (*input == '^') accidentals++;
+    else if (*input == '_') accidentals--;
     *input = stream->read();
   }
 
@@ -292,15 +289,10 @@ int ABCNoteParser::getFrequency(Stream* stream, char* input) {
     default: return -1;  // If, for whatever reason, we still don't have a note, exit with a failure
   }
 
-  // Get the octave modifier (optional)
-  if (*input == '\'') {
-    // Apostrophe ' puts the note up an octave
-    octave++;
-    *input = stream->read();
-  }    
-  if (*input == ',') {
-    // Comma , puts the note down an octave
-    octave--;
+  // Get the octave modifier(s)
+  while (strchr("\',", *input)) {
+    if (*input == '\'') octave++; // Apostrophe ' puts the note up an octave
+    else if (*input == ',') octave--; // Comma , puts the note down an octave
     *input = stream->read();
   }
 
