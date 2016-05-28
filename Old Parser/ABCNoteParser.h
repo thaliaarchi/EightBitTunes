@@ -5,7 +5,7 @@
 
 class ABCNoteParser {
   public:
-    ABCNoteParser(); 
+    ABCNoteParser();
     void reset();
     void getNextNote(Stream* str, int* freq, int* dur);
   private:
